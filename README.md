@@ -1,1 +1,1 @@
-# cribbageCompanion
+# Cribbage Companion
