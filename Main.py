@@ -11,11 +11,9 @@ class CribCompanion:
                      (1,'A','S'), (2,'2','S'), (3,'3','S'), (4,'4','S'), (5,'5','S'), (6,'6','S'), (7,'7','S'), (8,'8','S'), (9,'9','S'), (10,'10','S'), (10,'J','S'), (10,'Q','S'), (10,'K','S'),]
 
         self.shuffleDeck()
-        self.hand1 = self.dealCards(5)
-        #self.hand2 = self.dealCards(6)
+        self.hand1 = self.dealCards(6)
+        self.hand2 = self.dealCards(6)
         # print(self.hand1)
-
-
 
 
 
@@ -26,14 +24,25 @@ class CribCompanion:
 
 
 
-
-
     def dealCards(self, nDeal):
         hand = self.deck[:nDeal]
         self.deck = self.deck[nDeal:]
         return hand
 
 
+
+
+    def chooseBestHand(self, hand, throw):
+        combinationsObj = itertools.combinations(hand, len(hand)-throw)
+        combList = list(combinationsObj)
+        deckLen = len(self.deck)
+        for combo in combList:
+            modifierMap = defaultdict(int)
+            baseHand = self.countHand(list(combo))
+            for card in self.deck:
+                modifierMap[self.countHand(list(combo), cut=card)] += 1
+            # key = numpts, val = hands that will get you those points
+            print(combo, "base hand", baseHand, modifierMap)
 
 
 
@@ -150,6 +159,5 @@ class CribCompanion:
 
 if __name__ == '__main__':
     c = CribCompanion()
-    print(c.hand1[:-1],", cut=",c.hand1[-1])
-    print(c.countHand(c.hand1[:-1], cut=c.hand1[-1]))
-    #print(c.countHand([(3, '3', 'S'), (5, '5', 'S'), (5, '5', 'D'), (10, 'Q', 'S')], cut=(4, '4', 'H')))
+    print(c.hand1)
+    print(c.chooseBestHand(c.hand1,2))
