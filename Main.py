@@ -39,8 +39,7 @@ class CribCompanion:
 
     def countHand(self, hand, cut=None, isCrib=False):
         # 15's
-        def count15s(hand, cut):
-            if cut: hand.append(cut)
+        def count15s(hand):
             num15s = 0
             for r in range(2, len(hand) + 1):
                 combinationsObj = itertools.combinations(hand, r)
@@ -52,8 +51,7 @@ class CribCompanion:
 
 
         # pairs
-        def countPairs(hand, cut):
-            if cut: hand.append(cut)
+        def countPairs(hand):
             pairMap = defaultdict(int)
             pairPts = 0
             for card in hand:
@@ -71,7 +69,6 @@ class CribCompanion:
 
         # runs
         def countRuns(hand):
-            if cut: hand.append(cut)
             def numDup(card, duplicate, interpreter):
                 ans = 1
                 for dupCard in duplicates:
@@ -133,11 +130,25 @@ class CribCompanion:
                     if card[1] == 'J' and cut[2] == card[2]:
                         return 1
             return 0
-        return count15s(hand, cut) + countFlush(hand, cut) + countPairs(hand,cut) + countRuns(hand,cut) + countKnobs(hand, cut)
+        if cut:
+            fullhand = hand.copy()
+            fullhand.append(cut)
+            pts15 = count15s(fullhand)
+            ptsFlush = countFlush(hand, cut, isCrib)
+            ptsPairs = countPairs(fullhand)
+            ptsRuns = countRuns(fullhand)
+            ptsknobs = countKnobs(hand, cut)
+        else:
+            pts15 = count15s(hand)
+            ptsFlush = countFlush(hand, None, isCrib)
+            ptsPairs = countPairs(hand)
+            ptsRuns = countRuns(hand)
+            ptsknobs = 0
+        return pts15 + ptsFlush + ptsPairs + ptsRuns + ptsknobs
 
 
 
 if __name__ == '__main__':
     c = CribCompanion()
-    print(c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'D'), (10, 'J', 'D'), (10, 'Q', 'H'), (10, 'K', 'D')]))
+    print(c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'S'), (10, 'J', 'D'), (10, 'Q', 'S'), (10, 'K', 'D')]))
 
