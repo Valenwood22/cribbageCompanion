@@ -22,6 +22,11 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(0, self.c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'S'), (10, 'J', 'S'), (10, 'Q', 'S')], cut=(10, 'K', 'D'), isCrib=True))
         self.assertEqual(6, self.c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'S'), (10, 'J', 'S'), (10, 'Q', 'S')], cut=(10, 'K', 'S'), isCrib=True))
 
+    def testKnobs(self):
+        self.assertEqual(0, self.c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'S'), (10, 'J', 'S'), (10, 'Q', 'S')], cut=(10, 'K', 'D')))
+        self.assertEqual(1, self.c.countHand([(1, 'A', 'S'), (9, '9', 'D'), (10, '10', 'S'), (10, 'J', 'S'), (10, 'Q', 'S')], cut=(10, 'K', 'S')))
+        self.assertEqual(0, self.c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'S'), (10, 'J', 'S'), (10, 'Q', 'S')]))
+
 
 if __name__ == '__main__':
     unittest.main()

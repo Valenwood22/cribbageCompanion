@@ -133,7 +133,7 @@ class CribCompanion:
                     if card[1] == 'J' and cut[2] == card[2]:
                         return 1
             return 0
-        return countKnobs(hand, cut, isCrib)
+        return count15s(hand, cut) + countFlush(hand, cut) + countPairs(hand,cut) + countRuns(hand,cut) + countKnobs(hand, cut)
 
 
 
