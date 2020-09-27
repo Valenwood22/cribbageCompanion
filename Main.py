@@ -11,8 +11,8 @@ class CribCompanion:
                      (1,'A','S'), (2,'2','S'), (3,'3','S'), (4,'4','S'), (5,'5','S'), (6,'6','S'), (7,'7','S'), (8,'8','S'), (9,'9','S'), (10,'10','S'), (10,'J','S'), (10,'Q','S'), (10,'K','S'),]
 
         self.shuffleDeck()
-        self.hand1 = self.dealCards(6)
-        self.hand2 = self.dealCards(6)
+        self.hand1 = self.dealCards(5)
+        #self.hand2 = self.dealCards(6)
         # print(self.hand1)
 
 
@@ -150,5 +150,6 @@ class CribCompanion:
 
 if __name__ == '__main__':
     c = CribCompanion()
-    print(c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'S'), (10, 'J', 'D'), (10, 'Q', 'S'), (10, 'K', 'D')]))
-
+    print(c.hand1[:-1],", cut=",c.hand1[-1])
+    print(c.countHand(c.hand1[:-1], cut=c.hand1[-1]))
+    #print(c.countHand([(3, '3', 'S'), (5, '5', 'S'), (5, '5', 'D'), (10, 'Q', 'S')], cut=(4, '4', 'H')))
