@@ -13,7 +13,8 @@ class CribCompanion:
         self.shuffleDeck()
         self.hand1 = self.dealCards(6)
         self.hand2 = self.dealCards(6)
-        # print(self.hand1)
+        print(self.hand1)
+        print(self.hand2)
 
 
 
@@ -31,18 +32,36 @@ class CribCompanion:
 
 
 
+    def dealCertainCards(self, cards):
+        for card in cards:
+            self.deck.remove(card)
+        return cards
+
+
 
     def chooseBestHand(self, hand, throw):
         combinationsObj = itertools.combinations(hand, len(hand)-throw)
         combList = list(combinationsObj)
         deckLen = len(self.deck)
+        bestAvg = -1
+        bestHand = None
         for combo in combList:
             modifierMap = defaultdict(int)
             baseHand = self.countHand(list(combo))
             for card in self.deck:
                 modifierMap[self.countHand(list(combo), cut=card)] += 1
             # key = numpts, val = hands that will get you those points
-            print(combo, "base hand", baseHand, modifierMap)
+            s= ""
+            avg = 0
+            itemList = sorted(modifierMap.items(), key=lambda x:x[0])
+            for key, val in itemList:
+                avg += (key*val/deckLen)
+                # s += f" pts {key}:{val/deckLen:.2f}"
+            avg = round(avg,4)
+            if bestAvg < avg:
+                bestAvg = avg
+                bestHand = combo
+        print(bestHand, "Best Avg pts", bestAvg)
 
 
 
@@ -159,5 +178,5 @@ class CribCompanion:
 
 if __name__ == '__main__':
     c = CribCompanion()
-    print(c.hand1)
+    # print(c.hand1)
     print(c.chooseBestHand(c.hand1,2))
