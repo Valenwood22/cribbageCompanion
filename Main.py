@@ -1,4 +1,5 @@
 import itertools
+import math
 import random
 from collections import defaultdict
 
@@ -15,17 +16,31 @@ class CribCompanion:
         # print(self.hand1)
 
 
+
+
+
+
     def shuffleDeck(self):
         random.shuffle(self.deck)
+
+
+
+
+
 
     def dealCards(self, nDeal):
         hand = self.deck[:nDeal]
         self.deck = self.deck[nDeal:]
         return hand
 
-    def countHand(self, hand):
+
+
+
+
+    def countHand(self, hand, cut, isCrib=False):
         # 15's
-        def count15s(hand):
+        def count15s(hand, cut):
+            hand.append(cut)
             num15s = 0
             for r in range(2, len(hand) + 1):
                 combinationsObj = itertools.combinations(hand, r)
@@ -35,8 +50,10 @@ class CribCompanion:
                         num15s += 1
             return num15s*2
 
+
         # pairs
-        def countPairs(hand):
+        def countPairs(hand, cut):
+            hand.append(cut)
             pairMap = defaultdict(int)
             pairPts = 0
             for card in hand:
@@ -54,54 +71,50 @@ class CribCompanion:
 
         # runs
         def countRuns(hand):
-            # def isAscending(nums, interpreter):
-            #     for i in range(1, len(nums)):
-            #         if interpreter[nums[i - 1][1]] != interpreter[nums[i][1]]-1:
-            #             return False
-            #     return True
+            hand.append(cut)
+            def numDup(card, duplicate, interpreter):
+                ans = 1
+                for dupCard in duplicates:
+                    if interpreter[card[1]] == interpreter[dupCard[1]]:
+                        ans += 1
+                return ans
 
             interpreter = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13}
             runPts = 0
             hand.sort(key=lambda x:interpreter[x[1]])
             i = 0
-            tempA = []
-            while i<len(hand)-1:
-                if interpreter[hand[i+1][1]] == interpreter[hand[i][1]]+1 or interpreter[hand[i + 1][1]] == interpreter[hand[i][1]]:
-                    tempA.append(1)
+            duplicates = []
+            while i < len(hand)-1:
+                if interpreter[hand[i + 1][1]] == interpreter[hand[i][1]]:
+                    duplicates.append(hand.pop(i+1))
+                else:
+                    i += 1
 
-                    while i<len(hand)-1:
-                        if interpreter[hand[i + 1][1]] == interpreter[hand[i][1]]:
-                            tempA[-1] += 1
+            runIndexes = []
+            i = 0
+            while i < len(hand)-2:
+                if interpreter[hand[i+1][1]] == interpreter[hand[i][1]]+1 and interpreter[hand[i+2][1]] == interpreter[hand[i+1][1]]+1:
+                    runIndexes.append([i])
+                    i += 2
+                    while i < len(hand)-1:
+                        if interpreter[hand[i+1][1]] == interpreter[hand[i][1]]+1:
                             i += 1
                         else:
                             break
-                    i += 1
-                else:
-                    tempA.append(0)
-                    i += 1
-            i = 0
-            mem = 0
-            tempA.append(0)
-            while i < len(tempA):
-                if tempA[i] == 0:
-                    subA = tempA[mem+1:i]
-                    if len(subA) >= 2:
-                        ans = 1
-                        for val in subA:
-                            ans *= val
-                        runPts += ans * len(subA)
-                    mem = i
-
+                    runIndexes[-1].append(i)
                 i += 1
+            for runs in runIndexes:
+                dupTracker = []
+                for i in range(runs[0],runs[1]+1):
+                    dupTracker.append(numDup(hand[i], duplicates, interpreter))
+                runPts += math.prod(dupTracker) * (runs[1] - runs[0] + 1)
             return runPts
 
-
-
-
         # flushes
+
         return countRuns(hand)
 
 if __name__ == '__main__':
     c = CribCompanion()
-    print(c.countHand([(1, 'A', 'S'), (10, '10', 'S'), (10, '10', 'D'), (10, 'J', 'D'), (10, 'Q', 'H'), (10, 'K', 'D')]))
+    print(c.countHand([(1, 'A', 'S'), (9, '9', 'S'), (10, '10', 'D'), (10, 'J', 'D'), (10, 'Q', 'H'), (10, 'K', 'D')]))
 
