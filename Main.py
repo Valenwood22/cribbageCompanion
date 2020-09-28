@@ -16,8 +16,8 @@ class CribCompanion:
 
 
         self.shuffleDeck()
-        self.hand1 = self.dealCards(6)
-        self.hand2 = self.dealCards(6)
+        self.hand1 = self.dealCertainCards([(10, 'J', 'D'),(10, 'J', 'H'),(10, 'J', 'S'), (10, 'J', 'C')])
+        self.hand2 = self.dealCertainCards([(1, 'A', 'D'), (1, 'A', 'S'), (10, 'Q', 'D'), (10, 'Q', 'S')])
         self.cut = self.cutDeck()
         print("p1 hand", self.hand1)
         print("p2 hand", self.hand2)
@@ -196,6 +196,19 @@ class CribCompanion:
                 ans.append(card[1]+card[2])
             return ans
 
+        def legalPlays(hand, totalPts):
+            ans = []
+            for card in hand:
+                if totalPts + card[0] <= 31:
+                    ans.append(card)
+            return ans
+
+        def getLastC(lastCard, p1pts, p2pts):
+            if lastC == "p1":
+                return p1pts+1, p2pts
+            else:
+                return p1pts, p2pts+1
+
         def score(playOrder, totalPts, interpreter):
             ans = 0
             # 15's
@@ -204,7 +217,7 @@ class CribCompanion:
             elif totalPts == 31:
                 ans += 2
 
-            # runs
+            # runs there is a small bug here
             if len(playOrder) >= 3:
                 last3 = [interpreter[card[1]] for card in playOrder[-3:]]
                 last3.sort()
@@ -246,7 +259,7 @@ class CribCompanion:
                     ans += 2
             return ans
 
-
+        # ===== Driver Code =====
         interpreter = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13}
         player1Pts = 0
         player2Pts = 0
@@ -257,29 +270,65 @@ class CribCompanion:
         hand2Temp = hand2.copy()
         playOrder = []
         totalPts = 0
-        while len(hand1Temp) > 0 and len(hand2Temp) > 0:
-            print(player1Pts, player2Pts, playOrder)
+        stateP1 = "P"
+        stateP2 = "P"
+        lastC = ""
+        while len(hand1Temp) > 0 or len(hand2Temp) > 0:
+            print(totalPts, player1Pts, player2Pts, playOrder)
             if turn == "p1":
                 turn = "p2"
-                if len(hand1Temp) == 0:
-                    continue
                 playCard = input("Play a card Hand "+ str(formatHand(hand1Temp)) + ": ")
+                if playCard == "GO":
+                    if stateP2 == "GO":
+                        stateP1 = "P"
+                        stateP2 = "P"
+                        totalPts = 0
+                        player1Pts, player2Pts = getLastC(lastC, player1Pts, player2Pts)
+                    else:
+                        stateP1 = "GO"
+                    continue
                 playCard = self.deckMap[playCard]
                 playOrder.append(playCard)
                 totalPts += playCard[0]
                 hand1Temp.remove(playCard)
+                lastC = "p1"
                 player1Pts += score(playOrder, totalPts, interpreter)
+                if totalPts == 31:
+                    stateP1 = "P"
+                    stateP2 = "P"
+                    totalPts = 0
+                    if len(hand2Temp) == 0 and len(hand1Temp) == 0:
+                        totalPts = 31
             else:
                 turn = "p1"
-                if len(hand2Temp) == 0:
+                t = legalPlays(hand2Temp, totalPts)
+                if len(t) == 0:
+                    if stateP1 == "GO":
+                        stateP1 = "P"
+                        stateP2 = "P"
+                        totalPts = 0
+                        player1Pts, player2Pts = getLastC(lastC, player1Pts, player2Pts)
+                    else:
+                        stateP2 = "GO"
                     continue
-                playCard = random.choice(hand2Temp)
+
+                playCard = random.choice(t)
                 playOrder.append(playCard)
                 totalPts += playCard[0]
                 hand2Temp.remove(playCard)
+                lastC = "p2"
                 player2Pts += score(playOrder, totalPts, interpreter)
-        print(player1Pts, player2Pts, playOrder)
+                if totalPts == 31:
+                    stateP1 = "P"
+                    stateP2 = "P"
+                    totalPts = 0
+                    if len(hand2Temp) == 0 and len(hand1Temp) == 0:
+                        totalPts = 31
 
+        if totalPts != 31:
+            player1Pts, player2Pts =  getLastC(lastC, player1Pts, player2Pts)
+        print(totalPts, player1Pts, player2Pts, playOrder)
+        return player1Pts, player2Pts
 
 
 
