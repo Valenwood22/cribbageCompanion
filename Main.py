@@ -8,13 +8,20 @@ class CribCompanion:
         self.deck = [(1,'A','H'), (2,'2','H'), (3,'3','H'), (4,'4','H'), (5,'5','H'), (6,'6','H'), (7,'7','H'), (8,'8','H'), (9,'9','H'), (10,'10','H'), (10,'J','H'), (10,'Q','H'), (10,'K','H'),
                      (1,'A','D'), (2,'2','D'), (3,'3','D'), (4,'4','D'), (5,'5','D'), (6,'6','D'), (7,'7','D'), (8,'8','D'), (9,'9','D'), (10,'10','D'), (10,'J','D'), (10,'Q','D'), (10,'K','D'),
                      (1,'A','C'), (2,'2','C'), (3,'3','C'), (4,'4','C'), (5,'5','C'), (6,'6','C'), (7,'7','C'), (8,'8','C'), (9,'9','C'), (10,'10','C'), (10,'J','C'), (10,'Q','C'), (10,'K','C'),
-                     (1,'A','S'), (2,'2','S'), (3,'3','S'), (4,'4','S'), (5,'5','S'), (6,'6','S'), (7,'7','S'), (8,'8','S'), (9,'9','S'), (10,'10','S'), (10,'J','S'), (10,'Q','S'), (10,'K','S'),]
+                     (1,'A','S'), (2,'2','S'), (3,'3','S'), (4,'4','S'), (5,'5','S'), (6,'6','S'), (7,'7','S'), (8,'8','S'), (9,'9','S'), (10,'10','S'), (10,'J','S'), (10,'Q','S'), (10,'K','S') ]
+        self.deckMap = {"AH":(1,'A','H'), "2H":(2,'2','H'), "3H":(3,'3','H'), "4H":(4,'4','H'), "5H":(5,'5','H'), "6H":(6,'6','H'), "7H":(7,'7','H'), "8H":(8,'8','H'), "9H":(9,'9','H'), "0H":(10,'10','H'), "JH":(10,'J','H'), "QH":(10,'Q','H'), "KH":(10,'K','H'),
+                        "AD":(1,'A','D'), "2D":(2,'2','D'), "3D":(3,'3','D'), "4D":(4,'4','D'), "5D":(5,'5','D'), "6D":(6,'6','D'), "7D":(7,'7','D'), "8D":(8,'8','D'), "9D":(9,'9','D'), "0D":(10,'10','D'), "JD":(10,'J','D'), "QD":(10,'Q','D'), "KD":(10,'K','D'),
+                        "AC":(1,'A','C'), "2C":(2,'2','C'), "3C":(3,'3','C'), "4C":(4,'4','C'), "5C":(5,'5','C'), "6C":(6,'6','C'), "7C":(7,'7','C'), "8C":(8,'8','C'), "9C":(9,'9','C'), "0C":(10,'10','C'), "JC":(10,'J','C'), "QC":(10,'Q','C'), "KC":(10,'K','C'),
+                        "AS":(1,'A','S'), "2S":(2,'2','S'), "3S":(3,'3','S'), "4S":(4,'4','S'), "5S":(5,'5','S'), "6S":(6,'6','S'), "7S":(7,'7','S'), "8S":(8,'8','S'), "9S":(9,'9','S'), "0S":(10,'10','S'), "JS":(10,'J','S'), "QS":(10,'Q','S'), "KS":(10,'K','S')}
+
 
         self.shuffleDeck()
         self.hand1 = self.dealCards(6)
         self.hand2 = self.dealCards(6)
-        print(self.hand1)
-        print(self.hand2)
+        self.cut = self.cutDeck()
+        print("p1 hand", self.hand1)
+        print("p2 hand", self.hand2)
+        print("cut", self.cut)
 
 
 
@@ -29,6 +36,10 @@ class CribCompanion:
         hand = self.deck[:nDeal]
         self.deck = self.deck[nDeal:]
         return hand
+
+
+    def cutDeck(self):
+        return self.deck.pop(0)
 
 
 
@@ -176,7 +187,103 @@ class CribCompanion:
 
 
 
+
+
+    def pegging(self, hand1, hand2, cut=None, turn="p1"):
+        def formatHand(hand):
+            ans = []
+            for card in hand:
+                ans.append(card[1]+card[2])
+            return ans
+
+        def score(playOrder, totalPts, interpreter):
+            ans = 0
+            # 15's
+            if totalPts == 15:
+                ans += 2
+            elif totalPts == 31:
+                ans += 2
+
+            # runs
+            if len(playOrder) >= 3:
+                last3 = [interpreter[card[1]] for card in playOrder[-3:]]
+                last3.sort()
+                if last3[0] == last3[1]-1 and last3[1] == last3[2]-1:
+                    ans += 3
+                    i = 4
+                    gate = True
+                    while i<=len(playOrder):
+                        last = [interpreter[card[1]] for card in playOrder[-i:]]
+                        last.sort()
+                        j=0
+                        while j<len(last)-1:
+                            if last[j] != last[j+1] -1:
+                                gate = False
+                                break
+                            j+=1
+                        if not gate:
+                            break
+                        ans += 1
+                        i += 1
+
+            # pairs
+            if len(playOrder) == 2:
+                if playOrder[-1][1] == playOrder[-2][1]:
+                    ans += 2
+
+            if len(playOrder) == 3:
+                if playOrder[-1][1] == playOrder[-2][1] and playOrder[-2][1] == playOrder[-3][1]:
+                    ans += 6
+                elif playOrder[-1][1] == playOrder[-2][1]:
+                    ans += 2
+
+            if len(playOrder) >= 4:
+                if playOrder[-1][1] == playOrder[-2][1] and playOrder[-2][1] == playOrder[-3][1] and playOrder[-3][1] == playOrder[-4][1]:
+                    ans += 12
+                elif playOrder[-1][1] == playOrder[-2][1] and playOrder[-2][1] == playOrder[-3][1]:
+                    ans += 6
+                elif playOrder[-1][1] == playOrder[-2][1]:
+                    ans += 2
+            return ans
+
+
+        interpreter = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13}
+        player1Pts = 0
+        player2Pts = 0
+        if cut[1] == 'J':
+            if turn == "p1": player2Pts += 2
+            if turn == "p2": player1Pts += 2
+        hand1Temp = hand1.copy()
+        hand2Temp = hand2.copy()
+        playOrder = []
+        totalPts = 0
+        while len(hand1Temp) > 0 and len(hand2Temp) > 0:
+            print(player1Pts, player2Pts, playOrder)
+            if turn == "p1":
+                turn = "p2"
+                if len(hand1Temp) == 0:
+                    continue
+                playCard = input("Play a card Hand "+ str(formatHand(hand1Temp)) + ": ")
+                playCard = self.deckMap[playCard]
+                playOrder.append(playCard)
+                totalPts += playCard[0]
+                hand1Temp.remove(playCard)
+                player1Pts += score(playOrder, totalPts, interpreter)
+            else:
+                turn = "p1"
+                if len(hand2Temp) == 0:
+                    continue
+                playCard = random.choice(hand2Temp)
+                playOrder.append(playCard)
+                totalPts += playCard[0]
+                hand2Temp.remove(playCard)
+                player2Pts += score(playOrder, totalPts, interpreter)
+        print(player1Pts, player2Pts, playOrder)
+
+
+
+
 if __name__ == '__main__':
     c = CribCompanion()
     # print(c.hand1)
-    print(c.chooseBestHand(c.hand1,2))
+    print(c.pegging(c.hand1,c.hand2, cut=c.cut))
