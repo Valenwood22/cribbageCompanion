@@ -17,7 +17,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(2, self.c.countHand([(3, '3', 'D'), (9, '9', 'H'), (10, 'Q', 'H'), (4, '4', 'D')], cut=(4, '4', 'C')))
         self.assertEqual(16, self.c.countHand([(9, '9', 'C'), (9, '9', 'S'), (8, '8', 'C'), (7, '7', 'H')], cut=(6, '6', 'D')))
         self.assertEqual(6, self.c.countHand([(10, 'K', 'C'), (4, '4', 'D'), (5, '5', 'C'), (8, '8', 'C')], cut=(5, '5', 'S')))
-        self.assertEqual(0, self.c.countHand([(10, 'J', 'H'), (10, '10', 'D'), (7, '7', 'D'), (6, '6', 'C')], cut=(3, '3', 'S')))
+        self.assertEqual(0, self.c.countHand([(10, 'J', 'H'), (10,'10','D'), (7, '7', 'D'), (6, '6', 'C')], cut=(3, '3', 'S')))
         self.assertEqual(9, self.c.countHand([(1, 'A', 'D'), (6, '6', 'S'), (3, '3', 'S'), (2, '2', 'S')], cut=(6, '6', 'H')))
         self.assertEqual(6, self.c.countHand([(8, '8', 'H'), (10, 'K', 'H'), (5, '5', 'D'), (3, '3', 'H')], cut=(5, '5', 'H')))
         self.assertEqual(2, self.c.countHand([(3, '3', 'D'), (10, 'Q', 'H'), (8, '8', 'H'), (7, '7', 'D')], cut=(10, 'J', 'C')))
