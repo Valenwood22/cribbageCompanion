@@ -16,8 +16,8 @@ class CribCompanion:
 
 
         self.shuffleDeck()
-        self.hand1 = self.dealCertainCards([(10, 'J', 'D'),(10, 'J', 'H'),(10, 'J', 'S'), (10, 'J', 'C')])
-        self.hand2 = self.dealCertainCards([(1, 'A', 'D'), (1, 'A', 'S'), (10, 'Q', 'D'), (10, 'Q', 'S')])
+        self.hand1 = self.dealCards(6) #self.dealCertainCards([(10, 'J', 'D'),(10, 'J', 'H'),(10, 'J', 'S'), (10, 'J', 'C')])
+        self.hand2 = self.dealCards(6) #self.dealCertainCards([(1, 'A', 'D'), (1, 'A', 'S'), (10, 'Q', 'D'), (10, 'Q', 'S')])
         self.cut = self.cutDeck()
         print("p1 hand", self.hand1)
         print("p2 hand", self.hand2)
@@ -50,16 +50,20 @@ class CribCompanion:
 
 
 
-    def chooseBestHand(self, hand, throw):
+    def chooseBestHand(self, hand, cut, hand2, throw):
         combinationsObj = itertools.combinations(hand, len(hand)-throw)
         combList = list(combinationsObj)
-        deckLen = len(self.deck)
+        tempDeck = self.deck.copy()
+        tempDeck.extend(hand2)
+        tempDeck.append(cut)
+        deckLen = len(tempDeck)
         bestAvg = -1
         bestHand = None
         for combo in combList:
             modifierMap = defaultdict(int)
             baseHand = self.countHand(list(combo))
-            for card in self.deck:
+
+            for card in tempDeck:
                 modifierMap[self.countHand(list(combo), cut=card)] += 1
             # key = numpts, val = hands that will get you those points
             s= ""
@@ -190,6 +194,18 @@ class CribCompanion:
 
 
     def pegging(self, hand1, hand2, cut=None, turn="p1"):
+        def findBestPlay(options, playOrder, totalPts, interpreter):
+            mx = -1
+            ans = None
+            for i, card in enumerate(options):
+                playOrder.append(card)
+                tempScore = score(playOrder, totalPts+card[0], interpreter)
+                playOrder.pop()
+                if tempScore > mx:
+                    mx = tempScore
+                    ans = card
+            return ans
+
         def formatHand(hand):
             ans = []
             for card in hand:
@@ -312,7 +328,7 @@ class CribCompanion:
                         stateP2 = "GO"
                     continue
 
-                playCard = random.choice(t)
+                playCard = findBestPlay(t, playOrder, totalPts, interpreter)# random.choice(t)
                 playOrder.append(playCard)
                 totalPts += playCard[0]
                 hand2Temp.remove(playCard)
@@ -335,4 +351,5 @@ class CribCompanion:
 if __name__ == '__main__':
     c = CribCompanion()
     # print(c.hand1)
-    print(c.pegging(c.hand1,c.hand2, cut=c.cut))
+    print(c.pegging(c.hand1, c.hand2, cut=c.cut))
+    # print(c.chooseBestHand(c.hand1, c.cut, c.hand2, 2))
