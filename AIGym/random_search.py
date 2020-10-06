@@ -1,4 +1,4 @@
-import tensorflow as tf
+#import tensorflow as tf
 import numpy as np
 import gym
 import logging
@@ -32,5 +32,22 @@ class LinearAgent:
 
 def random_search():
     # implement this!
+    env = gym.make('CartPole-v0')
+    best_params = None
+    best_reward = 0
+    agent = LinearAgent()
+    harness = Harness()
+
+    for step in range(1000):
+        agent.parameters = np.random.rand(4)*2-1
+        reward = harness.run_episode(env, agent)
+        if reward > best_reward:
+            best_reward = reward
+            best_params = agent.parameters
+            if reward == 200:
+                break
+        if step % 5 == 0:
+            print(reward)
+
 
 random_search()
